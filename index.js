@@ -99,6 +99,12 @@ async function run() {
       const result = await volunteerCollection.deleteOne(query);
       res.send(result);
     });
+    app.delete("/requestDelete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await beVolunteerCollection.deleteOne(query);
+      res.send(result);
+    });
 
     //sort by deadline
     app.get("/sortPost", async (req, res) => {
