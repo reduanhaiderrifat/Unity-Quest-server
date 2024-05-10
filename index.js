@@ -41,6 +41,14 @@ async function run() {
       const result = await volunteerCollection.findOne(query);
       res.send(result);
     });
+
+    app.get("/posts/:organizer_email", async (req, res) => {
+      const email = req.params.organizer_email;
+      const result = await volunteerCollection
+        .find({ organizer_email: email })
+        .toArray();
+      res.send(result);
+    });
     app.post("/post", async (req, res) => {
       const postData = req.body;
       console.log(postData);
