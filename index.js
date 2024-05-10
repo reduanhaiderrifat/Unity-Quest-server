@@ -91,6 +91,15 @@ async function run() {
       const result = await volunteerCollection.deleteOne(query);
       res.send(result);
     });
+
+    //sort by deadline
+    app.get("/sortPost", async (req, res) => {
+      const cursor = volunteerCollection.find();
+      cursor.sort({ deadline: 1 });
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
     // Send a ping to confirm a successful connection
 
     console.log(
