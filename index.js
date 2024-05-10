@@ -61,6 +61,14 @@ async function run() {
       const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
     });
+    app.get("/request/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const result = await beVolunteerCollection
+        .find({ useremail: email })
+        .toArray();
+      res.send(result);
+    });
     app.put("/update/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
