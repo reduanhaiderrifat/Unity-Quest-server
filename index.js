@@ -29,7 +29,7 @@ async function run() {
       .collection("volunteerPost");
     const beVolunteerCollection = client
       .db("volunteerDB")
-      .collection("beVolunteer");
+      .collection("beVolunteerRequest");
 
     app.get("/allPost", async (req, res) => {
       const result = await volunteerCollection.find().toArray();
@@ -45,6 +45,12 @@ async function run() {
       const postData = req.body;
       console.log(postData);
       const result = await volunteerCollection.insertOne(postData);
+      res.send(result);
+    });
+    app.post("/request", async (req, res) => {
+      const requestData = req.body;
+      console.log(requestData);
+      const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
     });
 
