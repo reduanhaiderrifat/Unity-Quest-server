@@ -61,7 +61,29 @@ async function run() {
       const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
     });
-
+    app.put("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upset: true };
+      const updatePost = req.body;
+      const product = {
+        $set: {
+          title: updatePost.title,
+          thumbnail: updatePost.thumbnail,
+          location: updatePost.location,
+          description: updatePost.description,
+          category: updatePost.category,
+          deadline: updatePost.deadline,
+          number: updatePost.number,
+        },
+      };
+      const result = await volunteerCollection.updateOne(
+        filter,
+        product,
+        options
+      );
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
 
     console.log(
