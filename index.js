@@ -116,13 +116,28 @@ async function run() {
       const result = await cursor.toArray();
       res.json(result);
     });
-    //request update number od volunteer
+    //request update number decrese volunteer
     app.patch("/requestUpdate/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateOperation = {
         $inc: {
           number: -1,
+        },
+      };
+      const result = await volunteerCollection.updateOne(
+        filter,
+        updateOperation
+      );
+      res.json(result);
+    });
+    // update number increse
+    app.patch("/requestUpdateIncrese/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateOperation = {
+        $inc: {
+          number: 1,
         },
       };
       const result = await volunteerCollection.updateOne(
