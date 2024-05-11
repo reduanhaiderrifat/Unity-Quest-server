@@ -51,19 +51,19 @@ async function run() {
     });
     app.post("/post", async (req, res) => {
       const postData = req.body;
-      console.log(postData);
+      // console.log(postData);
       const result = await volunteerCollection.insertOne(postData);
       res.send(result);
     });
     app.post("/request", async (req, res) => {
       const requestData = req.body;
-      console.log(requestData);
+      // console.log(requestData);
       const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
     });
     app.get("/request/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      // console.log(email);
       const result = await beVolunteerCollection
         .find({ useremail: email })
         .toArray();
@@ -74,7 +74,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const options = { upset: true };
       const updatePost = req.body;
-      const product = {
+      const post = {
         $set: {
           title: updatePost.title,
           thumbnail: updatePost.thumbnail,
@@ -85,11 +85,7 @@ async function run() {
           number: updatePost.number,
         },
       };
-      const result = await volunteerCollection.updateOne(
-        filter,
-        product,
-        options
-      );
+      const result = await volunteerCollection.updateOne(filter, post, options);
       res.send(result);
     });
 
@@ -105,12 +101,34 @@ async function run() {
       const result = await beVolunteerCollection.deleteOne(query);
       res.send(result);
     });
+    //search by title
+    app.get("/titlePost/:title", async (req, res) => {
+      const title = req.params.title;
+      // console.log(title);
+      const result = await volunteerCollection.find({ title: title }).toArray();
+      res.send(result);
+    });
 
     //sort by deadline
     app.get("/sortPost", async (req, res) => {
       const cursor = volunteerCollection.find();
       cursor.sort({ deadline: 1 });
       const result = await cursor.toArray();
+      res.json(result);
+    });
+    //request update number od volunteer
+    app.patch("/requestUpdate/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateOperation = {
+        $inc: {
+          number: -1,
+        },
+      };
+      const result = await volunteerCollection.updateOne(
+        filter,
+        updateOperation
+      );
       res.json(result);
     });
 
