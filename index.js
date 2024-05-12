@@ -1,14 +1,33 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //midlewares
+app.use(cookieParser());
 app.use(express.json());
 app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+//verify middlewares
+
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  // console.log("token is the middle ware", token);
+  //no token avaiable
+  if (!token) {
+    return res.status(401).send({ message: "unAuthorized access" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unAuthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.u9zrvau.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -65,8 +84,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/posts/:organizer_email", async (req, res) => {
+    app.get("/posts/:organizer_email", verifyToken, async (req, res) => {
       const email = req.params.organizer_email;
+      console.log("token owner infu", req.user);
+      if (req.user.email !== req.params.organizer_email) {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
       const result = await volunteerCollection
         .find({ organizer_email: email })
         .toArray();
@@ -84,9 +107,12 @@ async function run() {
       const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
     });
-    app.get("/request/:email", async (req, res) => {
+    app.get("/request/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       // console.log(email);
+      if (req.user.email !== req.params.email) {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
       const result = await beVolunteerCollection
         .find({ useremail: email })
         .toArray();
