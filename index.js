@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -31,6 +32,28 @@ async function run() {
       .db("volunteerDB")
       .collection("beVolunteerRequest");
 
+    // API auth
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log("user for token", user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ token });
+    });
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("logout", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
+    //API DAta
     app.get("/allPost", async (req, res) => {
       const result = await volunteerCollection.find().toArray();
       res.send(result);
@@ -123,21 +146,6 @@ async function run() {
       const updateOperation = {
         $inc: {
           number: -1,
-        },
-      };
-      const result = await volunteerCollection.updateOne(
-        filter,
-        updateOperation
-      );
-      res.json(result);
-    });
-    // update number increse
-    app.patch("/requestUpdateIncrese/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateOperation = {
-        $inc: {
-          number: 1,
         },
       };
       const result = await volunteerCollection.updateOne(
