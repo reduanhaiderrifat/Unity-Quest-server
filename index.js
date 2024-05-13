@@ -59,7 +59,9 @@ async function run() {
     const beVolunteerCollection = client
       .db("volunteerDB")
       .collection("beVolunteerRequest");
-
+    const copyRightCollection = client
+      .db("volunteerDB")
+      .collection("copyRightRequest");
     // API auth
 
     const cookieOptions = {
@@ -185,6 +187,13 @@ async function run() {
       res.json(result);
     });
 
+    //post report
+
+    app.post("/copy", async (req, res) => {
+      const copyRight = req.body;
+      const result = await copyRightCollection.insertOne(copyRight);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
 
     console.log(
