@@ -10,7 +10,16 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 //midlewares
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://volunteer-management-web.web.app",
+      "https://volunteer-management-web.firebaseapp.com",
+    ],
+    credentials: true,
+  })
+);
 //verify middlewares
 
 const verifyToken = (req, res, next) => {
@@ -52,25 +61,25 @@ async function run() {
       .collection("beVolunteerRequest");
 
     // API auth
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    };
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      console.log("user for token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
 
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        })
-        .send({ token });
+      res.cookie("token", token, cookieOptions).send({ token });
     });
     app.post("/logout", async (req, res) => {
       const user = req.body;
-      console.log("logout", user);
-      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+      res
+        .clearCookie("token", { ...cookieOptions, maxAge: 0 })
+        .send({ success: true });
     });
     //API DAta
     app.get("/allPost", async (req, res) => {
@@ -86,7 +95,6 @@ async function run() {
 
     app.get("/posts/:organizer_email", verifyToken, async (req, res) => {
       const email = req.params.organizer_email;
-      console.log("token owner infu", req.user);
       if (req.user.email !== req.params.organizer_email) {
         return res.status(403).send({ message: "Forbidden Access" });
       }
@@ -97,19 +105,16 @@ async function run() {
     });
     app.post("/post", async (req, res) => {
       const postData = req.body;
-      // console.log(postData);
       const result = await volunteerCollection.insertOne(postData);
       res.send(result);
     });
     app.post("/request", async (req, res) => {
       const requestData = req.body;
-      // console.log(requestData);
       const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
     });
     app.get("/request/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
-      // console.log(email);
       if (req.user.email !== req.params.email) {
         return res.status(403).send({ message: "Forbidden Access" });
       }
@@ -153,7 +158,6 @@ async function run() {
     //search by title
     app.get("/titlePost/:title", async (req, res) => {
       const title = req.params.title;
-      // console.log(title);
       const result = await volunteerCollection.find({ title: title }).toArray();
       res.send(result);
     });
