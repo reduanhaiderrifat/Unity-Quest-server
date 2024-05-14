@@ -88,7 +88,7 @@ async function run() {
       const result = await volunteerCollection.find().toArray();
       res.send(result);
     });
-    app.get("/singlePost/:id", async (req, res) => {
+    app.get("/singlePost/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await volunteerCollection.findOne(query);
@@ -105,12 +105,12 @@ async function run() {
         .toArray();
       res.send(result);
     });
-    app.post("/post", async (req, res) => {
+    app.post("/post", verifyToken, async (req, res) => {
       const postData = req.body;
       const result = await volunteerCollection.insertOne(postData);
       res.send(result);
     });
-    app.post("/request", async (req, res) => {
+    app.post("/request", verifyToken, async (req, res) => {
       const requestData = req.body;
       const result = await beVolunteerCollection.insertOne(requestData);
       res.send(result);
@@ -125,7 +125,7 @@ async function run() {
         .toArray();
       res.send(result);
     });
-    app.put("/update/:id", async (req, res) => {
+    app.put("/update/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upset: true };
@@ -145,13 +145,13 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/delete/:id", async (req, res) => {
+    app.delete("/delete/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await volunteerCollection.deleteOne(query);
       res.send(result);
     });
-    app.delete("/requestDelete/:id", async (req, res) => {
+    app.delete("/requestDelete/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await beVolunteerCollection.deleteOne(query);
