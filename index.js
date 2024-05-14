@@ -121,7 +121,7 @@ async function run() {
         return res.status(403).send({ message: "Forbidden Access" });
       }
       const result = await beVolunteerCollection
-        .find({ useremail: email })
+        .find({ email: email })
         .toArray();
       res.send(result);
     });
