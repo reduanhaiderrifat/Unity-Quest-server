@@ -85,8 +85,18 @@ async function run() {
     });
     //API DAta
     app.get("/allPost", async (req, res) => {
-      const result = await volunteerCollection.find().toArray();
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const result = await volunteerCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
+    });
+    app.get("/postsCount", async (req, res) => {
+      const count = await volunteerCollection.estimatedDocumentCount();
+      res.send({ count });
     });
     app.get("/singlePost/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
