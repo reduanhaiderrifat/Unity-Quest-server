@@ -168,9 +168,13 @@ async function run() {
       res.send(result);
     });
     //search by title
-    app.get("/titlePost/:title", async (req, res) => {
-      const title = req.params.title;
-      const result = await volunteerCollection.find({ title: title }).toArray();
+    app.get("/titlePost", async (req, res) => {
+      const filter = req.query.search;
+      let query = {};
+      if (filter) {
+        query = { title: { $regex: filter, $options: "i" } };
+      }
+      const result = await volunteerCollection.find(query).toArray();
       res.send(result);
     });
 
